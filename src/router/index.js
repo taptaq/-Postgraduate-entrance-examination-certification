@@ -10,9 +10,9 @@ const routes = [
     component: () => import('../views/noVerify/index.vue'),
   },
   {
-    path: '/home',
-    name: 'home',
-    component: () => import('../views/home/index.vue'),
+    path: '/verify',
+    name: 'verify',
+    component: () => import('../views/verify/index.vue'),
   },
   {
     path: '/result',

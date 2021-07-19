@@ -116,7 +116,7 @@ import Header from "../../components/Header";
 import { areaList } from "@vant/area-data"; //引入省级数据
 
 export default {
-  name: "home",
+  name: "verify",
   components: {
     Header,
   },
@@ -241,6 +241,15 @@ export default {
         this.$toast.fail("在校时间不能为空");
         return;
       }
+
+      // if (this.date1 < "开学日期") {
+      //   this.$toast.fail("开始日期不能小于开学日期");
+      //   return;
+      // }
+      // if (this.date2 > "毕业日期") {
+      //   this.$toast.fail("结束日期不能大于毕业日期");
+      //   return;
+      // }
 
       if (this.Research_direction.length > 15) {
         this.$toast.fail("研究方向信息要在15字以内");

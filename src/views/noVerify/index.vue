@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     toVerify() {
-      this.$router.push("/home");
+      this.$router.push("/verify");
     },
   },
 };
