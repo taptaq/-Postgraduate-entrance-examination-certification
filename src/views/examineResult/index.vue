@@ -3,7 +3,10 @@
     <Header></Header>
     <ul>
       <li>
-        <img alt="" />
+        <div class="icon">
+          <van-icon name="manager" size="80" color="#1989fa" />
+        </div>
+
         <div class="personMsg">
           <h3>认证成功</h3>
           <p>电子科技大学</p>
@@ -36,10 +39,13 @@ li {
   box-shadow: 0 0 0.3125rem #ccc;
 }
 
-img {
+.icon {
   width: 100px;
   height: 100px;
   border: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .personMsg {
