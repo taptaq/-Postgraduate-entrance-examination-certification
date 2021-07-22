@@ -14,8 +14,8 @@
       </div>
       <div class="progress_content" v-show="success">
         <p>审核大概需要1-3个工作日</p>
-        <van-button type="info">修改认证</van-button>
-        <van-button type="info">放弃认证</van-button>
+        <van-button type="info" @click="toVerify">修改认证</van-button>
+        <van-button type="info" @click="toNoVerify">放弃认证</van-button>
       </div>
 
       <div class="icon_wrap" v-show="!success">
@@ -49,6 +49,14 @@ export default {
     return {
       success: true,
     };
+  },
+  methods: {
+    toVerify() {
+      this.$router.push("/verify");
+    },
+    toNoVerify() {
+      this.$router.push("/");
+    },
   },
 };
 </script>

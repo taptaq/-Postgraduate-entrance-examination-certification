@@ -3,21 +3,21 @@
     <Header></Header>
     <div class="content">
       <div class="tip">请填写下列资料以完成认证申请</div>
-      <van-form class="form">
+      <van-form class="form" method="post">
         <div class="label_title">学校*</div>
         <van-field
           readonly
           clickable
-          name="area"
+          name="school"
           :value="school"
           placeholder="请选择 - 请选择"
-          @click="showArea = true"
+          @click="showSchoolList = true"
         />
-        <van-popup v-model="showArea" position="bottom">
+        <van-popup v-model="showSchoolList" position="bottom">
           <van-area
             :area-list="areaList"
             @confirm="onConfirmSchool"
-            @cancel="showArea = false"
+            @cancel="showSchoolList = false"
             :columns-num="2"
           />
         </van-popup>
@@ -27,11 +27,31 @@
 
         <div class="select_time">
           <div class="label_title">在校时间*</div>
-          <van-cell :title="date1" @click="show1 = true" class="cell" />
-          <van-calendar v-model="show1" @confirm="onConfirmDate1" />
+          <!-- <van-cell :title="startDate" @click="showStartDate = true" class="cell" />
+          <van-calendar v-model="showStartDate" @confirm="onConfirmStartDate" />
           <span class="join">------</span>
-          <van-cell :title="date2" @click="show2 = true" class="cell cell-last" />
-          <van-calendar v-model="show2" @confirm="onConfirmDate2" />
+          <van-cell :title="endDate" @click="showEndDate = true" class="cell cell-last" />
+          <van-calendar v-model="showEndDate" @confirm="onConfirmEndDate" /> -->
+
+          <van-field
+            clickable
+            name="startDate"
+            :value="startDate"
+            placeholder="开始日期"
+            @click="showStartDate = true"
+            class="cell"
+          />
+          <van-calendar v-model="showStartDate" @confirm="onConfirmStartDate" />
+          <span class="join">------</span>
+          <van-field
+            clickable
+            name="endDate"
+            :value="endDate"
+            placeholder="结束日期"
+            @click="showEndDate = true"
+            class="cell cell-last"
+          />
+          <van-calendar v-model="showEndDate" @confirm="onConfirmEndDate" />
         </div>
 
         <div class="label_title">导师(选填)</div>
@@ -162,9 +182,11 @@ export default {
   },
   data() {
     return {
-      showArea: false,
-      school: "",
+      showSchoolList: false, //控制展示选择学校的区域
+      school: "", //学校的值
       areaList: {
+        // 通过后端传过来的接口，渲染对应的学校数据
+        // 现在看的是固定数据
         province_list: {
           110000: "北京",
           120000: "天津",
@@ -274,15 +296,15 @@ export default {
           511000: "成都中医药大学",
         },
       },
-      major: "",
-      show1: false,
-      show2: false,
-      date1: "开始日期",
-      date2: "结束日期",
-      Research_direction: "",
-      tutor: "",
-      email: "",
-      verify_code: "",
+      major: "", //专业的值
+      showStartDate: false, //控制显示开始日期的选择区域
+      showEndDate: false, //控制显示结束时间的选择区域
+      startDate: "开始日期",
+      endDate: "结束日期",
+      Research_direction: "", //研究方向的值
+      tutor: "", //导师的值
+      email: "", //邮箱的值
+      verify_code: "", //验证码的值
       showEmail: false,
       showCard: false,
       showCardReq: false,
@@ -291,46 +313,64 @@ export default {
       showEG: false,
       showActive: 0,
       showCardImg: true,
-      srcUrl: "",
+      srcUrl: "", //学生证图片的base64路径
+      formData: {
+        //提交的数据
+        school: "",
+        major: "",
+        startDate: "",
+        showEndDate: "",
+        Research_direction: "",
+        tutor: "",
+        email: "",
+        srcUrl: "",
+      },
     };
   },
   methods: {
+    // 选择学校
     onConfirmSchool(values) {
       this.school = values
         .filter((item) => !!item)
         .map((item) => item.name)
         .join("/");
-      this.showArea = false;
+      this.showSchoolList = false;
     },
 
+    // 选择日期
     formatDate(date) {
+      //格式化日期样式（年/月）
       return `${date.getFullYear()}/${date.getMonth() + 1}`;
     },
-    onConfirmDate1(date) {
-      this.show1 = false;
-      this.date1 = this.formatDate(date);
+    onConfirmStartDate(date) {
+      this.showStartDate = false;
+      this.startDate = this.formatDate(date);
     },
-    onConfirmDate2(date) {
-      this.show2 = false;
-      this.date2 = this.formatDate(date);
+    onConfirmEndDate(date) {
+      this.showEndDate = false;
+      this.endDate = this.formatDate(date);
     },
 
+    // 显示邮箱的区域
     onShowEmail(val) {
       this.showEmail = true;
       this.showCard = false;
       this.showActive = val;
     },
 
+    // 显示学生证的区域
     onShowCard(val) {
       this.showEmail = false;
       this.showCard = true;
       this.showActive = val;
     },
 
+    // 显示学生证上传的样例
     showExample() {
       this.showEG = true;
     },
 
+    // 上传学生证图片
     uploadImg(e) {
       let file = e.target.files[0];
       let fr = new FileReader();
@@ -342,6 +382,7 @@ export default {
       };
     },
 
+    // 发送验证码
     sendVerify() {
       this.disable = true;
       var i = 0;
@@ -357,49 +398,46 @@ export default {
       }, 1000);
     },
 
-    onFinish({ selectedOptions }) {
-      this.showArea = false;
-      this.fieldValue = selectedOptions.map((option) => option.text).join("/");
-    },
-
+    // 校验并提交表单的信息
     submitMsg() {
       if (!this.school) {
         this.$toast.fail("学校不能为空");
         return;
-      }
-      if (!this.major) {
+      } else if (!this.major) {
         this.$toast.fail("专业信息不能为空");
         return;
-      }
-      if (this.major.length > 15) {
+      } else if (this.major.length > 15) {
         this.$toast.fail("专业信息要在15字以内");
         return;
-      }
-
-      if (this.date1 === "开始日期" || this.date2 === "结束日期") {
+      } else if (this.startDate === "开始日期" || this.endDate === "结束日期") {
         this.$toast.fail("在校时间不能为空");
         return;
-      }
-
-      // if (this.date1 < "开学日期") {
-      //   this.$toast.fail("开始日期不能小于开学日期");
-      //   return;
-      // }
-      // if (this.date2 > "毕业日期") {
-      //   this.$toast.fail("结束日期不能大于毕业日期");
-      //   return;
-      // }
-
-      if (this.Research_direction.length > 15) {
+      } else if (new Date(this.startDate) > new Date(this.endDate)) {
+        this.$toast.fail("在校的开始时间不能大于结束时间");
+        return;
+      } else if (this.Research_direction.length > 15) {
         this.$toast.fail("研究方向信息要在15字以内");
         return;
-      }
-
-      if (!/^\S+\.edu\.cn$/.test(this.email) && this.showEmail) {
+      } else if (!this.email && this.showEmail) {
+        this.$toast.fail("邮箱号不能为空");
+        return;
+      } else if (!/^\S+\.edu\.cn$/.test(this.email) && this.showEmail) {
         this.$toast.fail("邮箱号必须以edu.cn结尾");
         return;
+      } else if (!this.srcUrl && this.showCard) {
+        this.$toast.fail("学生证图片上传不能为空");
+        return;
       } else {
-        this.$router.push("/progress");
+        // 校验全部正确的话，就把正确的信息都赋值到要提交数据的对象集合中
+        this.formatDate.school = this.school;
+        this.formatDate.major = this.major;
+        this.formatDate.startDate = this.startDate;
+        this.formatDate.endDate = this.endDate;
+        this.formatDate.Research_direction = this.Research_direction;
+        this.formatDate.tutor = this.tutor;
+        this.formatDate.email = this.email;
+        this.formatDate.srcUrl = this.srcUrl;
+        this.$router.push("/progress"); //随后跳转到进度页面
       }
     },
   },
@@ -440,7 +478,7 @@ export default {
   display: inline-block;
   width: 8.75rem;
   border: 1px solid #000;
-  height: 2.5rem;
+  height: 2.2rem;
   margin: 0.625rem 0.625rem 0 0;
   font-size: 0.9375rem;
   position: relative;
@@ -449,12 +487,6 @@ export default {
 
 .cell-last {
   margin-left: 0.625rem;
-}
-
-.cell div {
-  position: absolute;
-  top: 0.5rem;
-  left: 1rem;
 }
 
 .join {
